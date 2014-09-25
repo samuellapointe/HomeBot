@@ -1,4 +1,5 @@
 import os.path
+from Bot import Bot
 
 #create/load settings file
 fileName = "settings.cfg"
@@ -22,4 +23,5 @@ else: #file does not exist
 		file.write(password)
 		file.close()
 
-print(username + ", " + password)
+#Send parameters to real bot
+Bot.Connect(username, password)
