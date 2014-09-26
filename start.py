@@ -30,4 +30,4 @@ else: #file does not exist
 		file.close()
 
 #Send parameters to real bot
-Bot.Connect(username, password)
+Bot.Connect(username, password, ip, port)
