@@ -7,12 +7,14 @@ import json
 import urllib.request
 from Bot.Packets.Serverbound import Handshake, Login, EncryptionResponse
 from Bot.Packets import Packets
+from Bot import AESCipher
 from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA
 from Crypto.Cipher import AES
 from Crypto import Random
 from base64 import b64encode
+from base64 import b64decode
 import base64
 
 def Authentificate(publicKey, token, username, password):
@@ -90,17 +92,28 @@ def Connect(username, password, ip, port):
 	pubCipher = PKCS1_v1_5.new(RSA.importKey(publicKey)) 
 	Packets.Send(s, EncryptionResponse.CreateEncryptionResponse(pubCipher.encrypt(sharedSecret), pubCipher.encrypt(token)))
 	
-	#AES
-	iv = sys.stdin.read(16)
-	cipher = AES.AESCipher(sharedSecret, AES.MODE_CFB, iv)
-	
+	cipher = AESCipher.AESCipher(sharedSecret)
 	while(True):
-		data = s.recv(4096)
-		while((len(data) % 4096) == 0):
-			data = data + s.recv(4096)
+		buffer = s.recv(4096)
+		#data = buffer;
+		#while(len(buffer) == 4096):
+		#	buffer = s.recv(4096)
+		#	data = data + buffer
 
-		uncryptedData = cipher.decrypt(data[0:16])
-		print(data)
+		uncryptedData = cipher.decrypt(data)
+		
+		if(len(data) == 0):
+			break;
+			
+		#packetSize = Packets.UnpackVarint(uncryptedData[0:1])
+		packetId = uncryptedData[1]
+		#print(uncryptedData)
+		#print(packetId)
+		if("test" in str(uncryptedData)):
+			print(uncryptedData)
+			print(packetId)
+			
+		
 			
 	#Packets.Read(data)
 
