@@ -11,7 +11,9 @@ from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA
 from Crypto.Cipher import AES
+from Crypto import Random
 from base64 import b64encode
+import base64
 
 def Authentificate(publicKey, token, username, password):
 	sha1 = hashlib.sha1()
@@ -21,7 +23,6 @@ def Authentificate(publicKey, token, username, password):
 	sha1.update(publicKey) #public key
 	hash = javaHexDigest(sha1)
 	payload = json.dumps({"agent":{"name":"Minecraft","version":1},"username":username,"password":password}).encode('UTF-8')
-	print(payload)
 	
 	req = urllib.request.Request('https://authserver.mojang.com/authenticate')
 	req.add_header('Content-Type', 'application/json')
@@ -79,24 +80,28 @@ def Connect(username, password, ip, port):
 	publicKey = data[cpt:cpt+publicKeyLength]
 	
 	tokenLength = data[cpt+publicKeyLength]
-	print(tokenLength)
 	cpt += 1
 	
 	token = data[cpt+publicKeyLength:cpt+publicKeyLength+tokenLength]
 	sharedSecret = Authentificate(publicKey, token, username, password)
 	
-	#print(b64encode(publicKey))
 	
-	cipher = PKCS1_v1_5.new(RSA.importKey(publicKey))
-	Packets.Send(s, EncryptionResponse.CreateEncryptionResponse(cipher.encrypt(sharedSecret), cipher.encrypt(token)))
+	#To encrypt once
+	pubCipher = PKCS1_v1_5.new(RSA.importKey(publicKey)) 
+	Packets.Send(s, EncryptionResponse.CreateEncryptionResponse(pubCipher.encrypt(sharedSecret), pubCipher.encrypt(token)))
 	
-
-
+	#AES
+	iv = sys.stdin.read(16)
+	cipher = AES.AESCipher(sharedSecret, AES.MODE_CFB, iv)
+	
 	while(True):
 		data = s.recv(4096)
-		print(len(data))
-		print("---")
+		while((len(data) % 4096) == 0):
+			data = data + s.recv(4096)
+
+		uncryptedData = cipher.decrypt(data[0:16])
 		print(data)
-		if(len(data)!= 4096):
-			input()
+			
 	#Packets.Read(data)
+
+	
