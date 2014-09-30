@@ -5,21 +5,40 @@ import hashlib
 import os
 import json
 import urllib.request
-from Bot.Packets.Serverbound import Handshake, Login
+from Bot.Packets.Serverbound import Handshake, Login, EncryptionResponse
 from Bot.Packets import Packets
+from Crypto.Cipher import PKCS1_v1_5
+from Crypto.PublicKey import RSA
+from Crypto.Hash import SHA
+from base64 import b64encode
 
-def Authentificate(publicKey, token, username):
+def Authentificate(publicKey, token, username, password):
 	sha1 = hashlib.sha1()
 	sha1.update(bytes("", "UTF-8")) #empty server string
-	sha1.update(os.urandom(16)) #shared secret
+	sharedSecret = os.urandom(16)
+	sha1.update(sharedSecret) #shared secret
 	sha1.update(publicKey) #public key
 	hash = javaHexDigest(sha1)
-	payload = json.dumps({'accessToken': str(token), 'selectedProfile': username, 'serverId': hash}).encode('UTF-8')
+	payload = json.dumps({"agent":{"name":"Minecraft","version":1},"username":username,"password":password}).encode('UTF-8')
 	print(payload)
 	
+	req = urllib.request.Request('https://authserver.mojang.com/authenticate')
+	req.add_header('Content-Type', 'application/json')
+	response = urllib.request.urlopen(req, payload)
+	responseText = response.read().decode('utf-8')
+	responseVar = json.loads(responseText)
+	
+	accessToken = responseVar['accessToken']
+	selectedProfile = responseVar['selectedProfile']
+	payload = json.dumps({"accessToken": accessToken, "selectedProfile": selectedProfile, "serverId": hash}).encode('UTF-8')
 	req = urllib.request.Request('https://sessionserver.mojang.com/session/minecraft/join')
 	req.add_header('Content-Type', 'application/json')
 	response = urllib.request.urlopen(req, payload)
+	responseText = response.read().decode('utf-8')
+	
+	return sharedSecret
+
+	
 
 # This function courtesy of barneygale
 def javaHexDigest(digest):
@@ -54,14 +73,24 @@ def Connect(username, password, ip, port):
 	cpt=4
 	
 	publicKeyLength = data[cpt]
-	cpt += 1
+	cpt += 2
 	
-	publicKey = data[cpt:publicKeyLength]
-	cpt += 1
+	publicKey = data[cpt:cpt+publicKeyLength]
 	
 	tokenLength = data[cpt+publicKeyLength]
+	print(tokenLength)
 	cpt += 1
 	
 	token = data[cpt+publicKeyLength:cpt+publicKeyLength+tokenLength]
+	sharedSecret = Authentificate(publicKey, token, username, password)
+	
+	print(b64encode(publicKey))
+	
+	cipher = PKCS1_v1_5.new(RSA.importKey(publicKey))
+	
+	Packets.Send(s, EncryptionResponse.CreateEncryptionResponse(cipher.encrypt(sharedSecret), cipher.encrypt(token)))
 
-	Authentificate(publicKey, token, username)
+	while(True):
+		data = s.recv(1024)
+		print(data)
+	#Packets.Read(data)

@@ -1,7 +1,7 @@
 import struct
 
 #Functions for types
-def packVarint(val):
+def PackVarint(val):
 	total = b''
 	if val < 0:
 		val = (1<<32)+val
@@ -13,7 +13,7 @@ def packVarint(val):
 	total += struct.pack('B', bits)
 	return total
  
-def unpackVarint(buff):
+def UnpackVarint(buff):
 	total = 0
 	shift = 0
 	val = 0x80
@@ -31,11 +31,11 @@ def PackUShort(short):
 	
 def PackString(string):
 	encodedString = bytes(string, 'utf-8')
-	length = packVarint(len(encodedString))
+	length = PackVarint(len(encodedString))
 	return length + encodedString
 	
 def Send(s, packet):
-	s.send(packVarint(len(packet)) + packet)
+	s.send(PackVarint(len(packet)) + packet)
 	print("Sent packet: " + str(packet))
 	
 def Read(packet):
