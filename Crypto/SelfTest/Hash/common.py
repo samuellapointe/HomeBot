@@ -53,11 +53,11 @@ class HashDigestSizeSelfTest(unittest.TestCase):
         return self.description
 
     def runTest(self):
-        self.failUnless(hasattr(self.hashmod, "digest_size"))
-        self.assertEquals(self.hashmod.digest_size, self.expected)
+        self.assertTrue(hasattr(self.hashmod, "digest_size"))
+        self.assertEqual(self.hashmod.digest_size, self.expected)
         h = self.hashmod.new()
-        self.failUnless(hasattr(h, "digest_size"))
-        self.assertEquals(h.digest_size, self.expected)
+        self.assertTrue(hasattr(h, "digest_size"))
+        self.assertEqual(h.digest_size, self.expected)
 
 
 class HashSelfTest(unittest.TestCase):

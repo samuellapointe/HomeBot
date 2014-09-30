@@ -158,7 +158,7 @@ Lr7UkvEtFrRhDDKMtuIIq19FrL4pUIMymPMSLBn3hJLe30Dw48GQM4UCAwEAAQ==
     def testImportKey1(self):
         """Verify import of RSAPrivateKey DER SEQUENCE"""
         key = self.rsa.importKey(self.rsaKeyDER)
-        self.failUnless(key.has_private())
+        self.assertTrue(key.has_private())
         self.assertEqual(key.n, self.n)
         self.assertEqual(key.e, self.e)
         self.assertEqual(key.d, self.d)
@@ -168,7 +168,7 @@ Lr7UkvEtFrRhDDKMtuIIq19FrL4pUIMymPMSLBn3hJLe30Dw48GQM4UCAwEAAQ==
     def testImportKey2(self):
         """Verify import of SubjectPublicKeyInfo DER SEQUENCE"""
         key = self.rsa.importKey(self.rsaPublicKeyDER)
-        self.failIf(key.has_private())
+        self.assertFalse(key.has_private())
         self.assertEqual(key.n, self.n)
         self.assertEqual(key.e, self.e)
 
@@ -228,7 +228,7 @@ Lr7UkvEtFrRhDDKMtuIIq19FrL4pUIMymPMSLBn3hJLe30Dw48GQM4UCAwEAAQ==
         """Verify import of encrypted PrivateKeyInfo DER SEQUENCE"""
         for t in self.rsaKeyEncryptedPEM:
             key = self.rsa.importKey(t[1], t[0])
-            self.failUnless(key.has_private())
+            self.assertTrue(key.has_private())
             self.assertEqual(key.n, self.n)
             self.assertEqual(key.e, self.e)
             self.assertEqual(key.d, self.d)
@@ -238,7 +238,7 @@ Lr7UkvEtFrRhDDKMtuIIq19FrL4pUIMymPMSLBn3hJLe30Dw48GQM4UCAwEAAQ==
     def testImportKey9(self):
         """Verify import of unencrypted PrivateKeyInfo DER SEQUENCE"""
         key = self.rsa.importKey(self.rsaKeyDER8)
-        self.failUnless(key.has_private())
+        self.assertTrue(key.has_private())
         self.assertEqual(key.n, self.n)
         self.assertEqual(key.e, self.e)
         self.assertEqual(key.d, self.d)
@@ -248,7 +248,7 @@ Lr7UkvEtFrRhDDKMtuIIq19FrL4pUIMymPMSLBn3hJLe30Dw48GQM4UCAwEAAQ==
     def testImportKey10(self):
         """Verify import of unencrypted PrivateKeyInfo DER SEQUENCE, encoded with PEM"""
         key = self.rsa.importKey(self.rsaKeyPEM8)
-        self.failUnless(key.has_private())
+        self.assertTrue(key.has_private())
         self.assertEqual(key.n, self.n)
         self.assertEqual(key.e, self.e)
         self.assertEqual(key.d, self.d)
