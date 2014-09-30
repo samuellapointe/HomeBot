@@ -10,6 +10,7 @@ from Bot.Packets import Packets
 from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA
+from Crypto.Cipher import AES
 from base64 import b64encode
 
 def Authentificate(publicKey, token, username, password):
@@ -84,13 +85,18 @@ def Connect(username, password, ip, port):
 	token = data[cpt+publicKeyLength:cpt+publicKeyLength+tokenLength]
 	sharedSecret = Authentificate(publicKey, token, username, password)
 	
-	print(b64encode(publicKey))
+	#print(b64encode(publicKey))
 	
 	cipher = PKCS1_v1_5.new(RSA.importKey(publicKey))
-	
 	Packets.Send(s, EncryptionResponse.CreateEncryptionResponse(cipher.encrypt(sharedSecret), cipher.encrypt(token)))
+	
+
 
 	while(True):
-		data = s.recv(1024)
+		data = s.recv(4096)
+		print(len(data))
+		print("---")
 		print(data)
+		if(len(data)!= 4096):
+			input()
 	#Packets.Read(data)
