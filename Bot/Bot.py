@@ -5,6 +5,7 @@ import hashlib
 import os
 import json
 import urllib.request
+import zlib
 from Bot.Packets.Serverbound import Handshake, Login, EncryptionResponse
 from Bot.Packets import Packets
 from Bot import AESCipher
@@ -95,24 +96,24 @@ def Connect(username, password, ip, port):
 	cipher = AESCipher.AESCipher(sharedSecret)
 	while(True):
 		buffer = s.recv(4096)
-		#data = buffer;
-		#while(len(buffer) == 4096):
-		#	buffer = s.recv(4096)
-		#	data = data + buffer
+		data = buffer;
+		while(len(buffer) == 4096):
+			buffer = s.recv(4096)
+			data = data + buffer
 
 		uncryptedData = cipher.decrypt(data)
 		
-		if(len(data) == 0):
-			break;
+		#if(len(data) == 0):
+			#break;
 			
-		#packetSize = Packets.UnpackVarint(uncryptedData[0:1])
-		packetId = uncryptedData[1]
-		#print(uncryptedData)
-		#print(packetId)
-		if("test" in str(uncryptedData)):
-			print(uncryptedData)
-			print(packetId)
-			
+		#packetSize = Packets.UnpackVarint(uncryptedData[0:2])
+		if(len(uncryptedData) > 3):
+			packetId = uncryptedData[3]
+			if(packetId == 2):
+				print(uncryptedData)
+			if(packetId == 0):
+				print("KEEPALIVE" + str(len(uncryptedData)))
+				#Packets.Send(s, data)
 		
 			
 	#Packets.Read(data)

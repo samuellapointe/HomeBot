@@ -13,17 +13,14 @@ def PackVarint(val):
 	total += struct.pack('B', bits)
 	return total
  
-def UnpackVarint(buff):
-	total = 0
-	shift = 0
-	val = 0x80
-	while val&0x80:
-		val = struct.unpack('B', buff)[0]
-		total |= ((val&0x7F)<<shift)
-		shift += 7
-	if total&(1<<31):
-		total = total - (1<<32)
-	return total
+def UnpackVarint(self):
+	d = 0
+	for i in range(5):
+		b = self.unpack("B")
+		d |= (b & 0x7F) << 7*i
+		if not b & 0x80:
+			break
+	return d
 
 #unsigned short
 def PackUShort(short):
